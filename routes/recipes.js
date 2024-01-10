@@ -2,7 +2,7 @@
 const express = require("express");
 const { authenticate } = require("../middlewares/auth");
 
-const {getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe, getRecipeRecommendation, getPairingRecommendation, addRecipeToFavorites } = require("../controllers/recipe");
+const {getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe, getRecipeRecommendation, getPairingRecommendation, addRecipeToFavorites, getSeasonRecommendation } = require("../controllers/recipe");
 
 const router = express.Router();
 
@@ -72,6 +72,16 @@ router.post(
     authenticate,
     (req, res) => {
         getPairingRecommendation(req, res).catch((error) => {
+            res.status(500).json({ error: "Internal Server Error" });
+        });
+    }
+)
+
+router.post(
+    "/pairings/season",
+    authenticate,
+    (req, res) => {
+        getSeasonRecommendation(req, res).catch((error) => {
             res.status(500).json({ error: "Internal Server Error" });
         });
     }

@@ -171,7 +171,7 @@ const getPairingRecommendation = async (req, res) => {
 
         const recipe = await Recipe.findOne({ where: { id: recipeId } });
 
-        console.log(recipe)
+        //console.log(recipe)
 
         const prompt = `Hi Chef, I'm looking for something to pair with ${recipe.name}`;
 
@@ -221,7 +221,7 @@ const getSeasonRecommendation = async (req, res) => {
 
         const recipe = await Recipe.findOne({ where: { id: recipeId } });
 
-        console.log(recipe)
+        //console.log(recipe)
 
         const prompt = `Hi Chef, I'm looking for something to pair with ${recipe.name} with the current season`;
 
