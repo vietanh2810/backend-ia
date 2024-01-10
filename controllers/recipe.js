@@ -278,7 +278,8 @@ const getCaloryRecommendation = async (req, res) => {
         const messages = [
             {
                 role: "system",
-                content: `You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
+                content: `
+                    You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
                     Your expertise ranges from classic French cuisine to innovative modern dishes.
                     You're known for your creative flavor combinations and impeccable presentation skills.
                     You have to give dishes with ingredients filtered by calory.
