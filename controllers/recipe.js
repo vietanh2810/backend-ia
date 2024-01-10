@@ -236,8 +236,7 @@ const getSeasonRecommendation = async (req, res) => {
                         You have to return/answer with a JSON object only with this format:
                         {
                             "recommendatioSeason": "Brief text describing the pairing recommendation",
-                        }
-                        `
+                        }`
             },
             {
                 role: "user",
