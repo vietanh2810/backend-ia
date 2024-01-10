@@ -273,7 +273,7 @@ const getCaloryRecommendation = async (req, res) => {
 
         console.log(recipe)
 
-        const prompt = `Hi Chef, I'm looking for a recipe of ${recipe.name} filtered by calories in the dishes`;
+        const prompt = `Hi Chef, I'm looking for a recipe of ${recipe.name} filtered by calories in the dishes.`;
 
         const messages = [
             {
