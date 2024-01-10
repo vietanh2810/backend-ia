@@ -261,6 +261,60 @@ const getSeasonRecommendation = async (req, res) => {
     }
 }
 
+const getCaloryRecommendation = async (req, res) => {
+    try {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const { recipeId } = req.body;
+
+        const recipe = await Recipe.findOne({ where: { id: recipeId } });
+
+        console.log(recipe)
+
+        const prompt = `Hi Chef, I'm looking for a recipe of ${recipe.name} filtered by calories in the dishe.`;
+
+        const messages = [
+            {
+                role: "system",
+                content: 
+                `
+                    You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
+                    Your expertise ranges from classic French cuisine to innovative modern dishes.
+                    You're known for your creative flavor combinations and impeccable presentation skills.
+                    You have to give dishes with ingredients filtered by calory.
+                    You have to give the dishe's calories.
+                    You gonna get asked for dishes's pairing recommendation from user.
+                    You have to return/answer with a JSON object only with this format:
+                    {
+                        "recommendatioSeason": "Brief text describing the pairing recommendation",
+                    }
+                `
+            },
+            {
+                role: "user",
+                content: prompt
+            }
+        ];
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: messages,
+        });
+
+        const response = JSON.parse(completion.choices[0].message.content);
+
+        const pairingRecommendation = {
+            recommendation: response.recommendation
+        }
+        return res.status(200).json(pairingRecommendation);
+    }
+    catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+
 const addRecipeToFavorites = async (req, res) => {
     try {
         const { dataValues } = req.user;
@@ -316,5 +370,6 @@ module.exports = {
     addRecipeToFavorites,
     getPairingRecommendation,
     getSeasonRecommendation,
+    getCaloryRecommendation,
     rateRecipe
 };
