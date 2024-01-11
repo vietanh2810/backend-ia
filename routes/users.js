@@ -11,7 +11,7 @@
 //importing modules
 const express = require("express");
 const userController = require("../controllers/user");
-const { signup, getAllUsers, login, validateUser } = userController;
+const { signup, getAllUsers, login, validateUser, getOneUser } = userController;
 const userAuth = require("../middlewares/auth");
 const { authenticate, checkAdminRole, saveUser } = userAuth;
 
@@ -56,5 +56,15 @@ router.post("/login",
     });
   },
 );
+
+//profile route
+router.get("/profile",
+  authenticate,
+  (req, res) => {
+    getOneUser(req, res).catch((error) => {
+      res.status(500).json({ error: "Internal Server Error" });
+    });
+  }
+)
 
 module.exports = router;

@@ -136,6 +136,37 @@ const getAllUsers = async (req, res) => {
     }
 };
 
+const getOneUser = async (req, res) => {
+    try {
+        const { dataValues } = req.user;
+
+        const userId = dataValues.id;
+        const user = await User.findOne({ where: { id: userId } });
+        //loop every user and check if the user is validated
+        //console.log(users);
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+const editUser = async (req, res) => {
+    try {
+        const { dataValues } = req.user;
+        const { username, email, preferences } = req.body;
+
+        const userId = dataValues.id;
+        const user = await User.update({ where: { id: userId } });
+        //loop every user and check if the user is validated
+        //console.log(users);
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 const createDefaultWebmaster = async () => {
     try {
         const password = "user1234";
@@ -161,4 +192,5 @@ module.exports = {
     getAllUsers,
     createDefaultAdmin,
     createDefaultWebmaster,
+    getOneUser
 };
