@@ -111,24 +111,32 @@ io.on("connection", (socket) => {
     try {
       // Add the user message to the conversation history
       conversationHistory.push({ role: "user", content: message });
-
-      const completion = await openai.chat.completions.create({
+  
+      const stream = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: conversationHistory,
-      });
-
-      const response = completion.choices[0].message.content;
-
-      // Add the assistant's response to the conversation history
-      conversationHistory.push({ role: "assistant", content: response });
-
-      socket.emit("message", response);
+        stream: true
+      }, { responseType: 'stream' });  
+      
+      for await (const chunk of stream) {
+        if (chunk.choices) {
+          const assistantResponse = chunk.choices[0]?.delta?.content;
+          if (assistantResponse) {
+            // Stream the assistant's response to the client
+            socket.emit("message", assistantResponse);
+          }
+        }
+      }
+  
+      // Finish the streaming when the assistant is done
+      socket.emit("message", "[DONE]");
       callback();
     } catch (error) {
       console.error(error);
       callback("Error: Unable to connect to the chatbot");
     }
   });
+  
 
   socket.on("disconnect", () => {
     console.log("User disconnected");
