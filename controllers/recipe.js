@@ -3,6 +3,7 @@ const defaultRecipes = require("../fakeData/recipe");
 const { OpenAI } = require("openai");
 
 const Recipe = db.recipes;
+const User = db.users;
 const UserFavorites = db.userFavorites;
 const Rating = db.ratings;
 // Assume the remaining recipes are similarly structured and added to this array
@@ -103,7 +104,9 @@ const getRecipeRecommendation = async (req, res) => {
 
         const { dataValues } = req.user;
 
-        const preferences = dataValues.preferences;
+        const user = await User.findOne({ where: { id: dataValues.id } });
+
+        const preferences = user.preferences;
 
         const { prompt } = req.body;
 
@@ -170,8 +173,6 @@ const getPairingRecommendation = async (req, res) => {
         const { recipeId } = req.body;
 
         const recipe = await Recipe.findOne({ where: { id: recipeId } });
-
-        console.log(recipe)
 
         const prompt = `Hi Chef, I'm looking for something to pair with ${recipe.name}`;
 
