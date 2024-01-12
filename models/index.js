@@ -8,8 +8,8 @@ const sequelize = new Sequelize({
     //   password: "fP4nPtvwM6dzuNMDRhRE0niKhaU5pUqt",
     host: "localhost",
     port: 5432,
-    database: "postgres",
-    username: "postgres",
+    database: "iadb",
+    username: "vietanh",
     password: "ChangeMe@123",
     dialect: "postgres",
     pool: {
