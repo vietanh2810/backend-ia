@@ -219,7 +219,7 @@ const recipes = [
         servings: 24,
         category: "Dessert",
         season: "All",
-        imageURL: "${BASE_URL}/images/chocolate_chip_cookies.jpg",
+        imageURL: `${BASE_URL}/images/chocolate_chip_cookies.jpg`,
         userId: 1
     },
     {
@@ -231,7 +231,7 @@ const recipes = [
         servings: 4,
         category: "Main Dish",
         season: "All",
-        imageURL: "${BASE_URL}/images/chicken_alfredo_pasta.jpg",
+        imageURL: `${BASE_URL}/images/chicken_alfredo_pasta.jpg`,
         userId: 1
     },
     {
@@ -243,7 +243,7 @@ const recipes = [
         servings: 6,
         category: "Vegetarian",
         season: "All",
-        imageURL: "${BASE_URL}/images/vegetarian_stir_fry.jpg",
+        imageURL: `${BASE_URL}/images/vegetarian_stir_fry.jpg`,
         userId: 1
     },
     {
@@ -255,7 +255,7 @@ const recipes = [
         servings: 4,
         category: "Seafood",
         season: "Spring/Summer",
-        imageURL: "${BASE_URL}/images/grilled_salmon.jpg",
+        imageURL: `${BASE_URL}/images/grilled_salmon.jpg`,
         userId: 1
     },
     {
@@ -267,7 +267,7 @@ const recipes = [
         servings: 4,
         category: "Salad",
         season: "Summer",
-        imageURL: "${BASE_URL}/images/caprese_salad.jpg",
+        imageURL: `${BASE_URL}/images/caprese_salad.jpg`,
         userId: 1
     },
     {
@@ -279,7 +279,7 @@ const recipes = [
         servings: 8,
         category: "Mexican",
         season: "All",
-        imageURL: "${BASE_URL}/images/beef_tacos.jpg",
+        imageURL: `${BASE_URL}/images/beef_tacos.jpg`,
         userId: 1
     },
     {
@@ -291,7 +291,7 @@ const recipes = [
         servings: 6,
         category: "Soup",
         season: "Fall",
-        imageURL: "${BASE_URL}/images/pumpkin_soup.jpg",
+        imageURL: `${BASE_URL}/images/pumpkin_soup.jpg`,
         userId: 1
     },
     {
@@ -303,7 +303,7 @@ const recipes = [
         servings: 4,
         category: "Seafood",
         season: "All",
-        imageURL: "${BASE_URL}/images/shrimp_scampi.jpg",
+        imageURL: `${BASE_URL}/images/shrimp_scampi.jpg`,
         userId: 1
     },
     {
@@ -315,7 +315,7 @@ const recipes = [
         servings: 6,
         category: "Vegetarian",
         season: "All",
-        imageURL: "${BASE_URL}/images/vegetable_curry.jpg",
+        imageURL: `${BASE_URL}/images/vegetable_curry.jpg`,
         userId: 1
     },
     {
@@ -327,7 +327,7 @@ const recipes = [
         servings: 4,
         category: "Breakfast",
         season: "All",
-        imageURL: "${BASE_URL}/images/blueberry_pancakes.jpg",
+        imageURL: `${BASE_URL}/images/blueberry_pancakes.jpg`,
         userId: 1
     },
     {
@@ -339,7 +339,7 @@ const recipes = [
         servings: 4,
         category: "Asian",
         season: "All",
-        imageURL: "${BASE_URL}/images/teriyaki_chicken.jpg",
+        imageURL: `${BASE_URL}/images/teriyaki_chicken.jpg`,
         userId: 1
     },
     {
@@ -351,7 +351,7 @@ const recipes = [
         servings: 4,
         category: "Vegetarian",
         season: "All",
-        imageURL: "${BASE_URL}/images/vegetarian_quesadillas.jpg",
+        imageURL: `${BASE_URL}/images/vegetarian_quesadillas.jpg`,
         userId: 1
     }
 ];
