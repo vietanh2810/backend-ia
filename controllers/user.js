@@ -113,26 +113,30 @@ const { v4: uuidv4 } = require("uuid");
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll();
-        //loop every user and check if the user is validated
-
-        for (let i = 0; i < users.length; i++) {
-            let tmpId = users[i].id;
-            let tmpCompany = await Company.findOne({ where: { userId: tmpId } });
-
-            if (tmpCompany && tmpCompany.kbis !== null) {
-                const rawData = users[i].get();
-
-                rawData.kbis = tmpCompany.kbis;
-
-                users[i] = rawData;
-            }
-        }
-
-        //console.log(users);
 
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+const getUserProfile = async (req, res) => {
+    try {
+        const { dataValues } = req.user;
+
+        const user = await User.findOne({ where: { id: dataValues.id } });
+
+        //unset password
+        user.password = undefined;
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        return res.status(200).json(user);
+    } catch (error) {
+        console.error("Error getting user profile:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
@@ -155,10 +159,46 @@ const createDefaultWebmaster = async () => {
     }
 };
 
+const editUser = async (req, res) => {
+    try {
+        const { dataValues } = req.user;
+
+        const user = await User.findOne({ where: { id: dataValues.id } });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const { username, email, preferences } = req.body;
+
+        await User.update(
+            {
+                username: username,
+                email: email,
+                preferences: preferences,
+            },
+            {
+                where: {
+                    id: dataValues.id,
+                },
+            }
+        );
+
+        const newUser = await User.findOne({ where: { id: dataValues.id } });
+
+        return res.status(200).json({ message: "User updated", user: newUser });
+    } catch (error) {
+        console.error("Error updating user:", error);
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
 module.exports = {
     signup,
     login,
     getAllUsers,
     createDefaultAdmin,
     createDefaultWebmaster,
+    getUserProfile,
+    editUser
 };

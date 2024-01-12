@@ -2,7 +2,7 @@
 const express = require("express");
 const { authenticate } = require("../middlewares/auth");
 
-const {getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe, getRecipeRecommendation, getPairingRecommendation, addRecipeToFavorites } = require("../controllers/recipe");
+const {getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe, getRecipeRecommendation, getPairingRecommendation, addRecipeToFavorites, getCalorie, rateRecipe, getRecipeRating, getRecipeShoppingList } = require("../controllers/recipe");
 
 const router = express.Router();
 
@@ -78,6 +78,16 @@ router.post(
 )
 
 router.post(
+    "/calories",
+    authenticate,
+    (req, res) => {
+        getCalorie(req, res).catch((error) => {
+            res.status(500).json({ error: "Internal Server Error" });
+        });
+    }
+);
+
+router.post(
     "/favorites",
     authenticate,
     (req, res) => {
@@ -92,6 +102,26 @@ router.post(
     authenticate,
     (req, res) => {
         rateRecipe(req, res).catch((error) => {
+            res.status(500).json({ error: "Internal Server Error" });
+        });
+    }
+)
+
+router.get(
+    "/:id/ratings",
+    authenticate,
+    (req, res) => {
+        getRecipeRating(req, res).catch((error) => {
+            res.status(500).json({ error: "Internal Server Error" });
+        });
+    }
+)
+
+router.get(
+    "/:id/shopping-list",
+    authenticate,
+    (req, res) => {
+        getRecipeShoppingList(req, res).catch((error) => {
             res.status(500).json({ error: "Internal Server Error" });
         });
     }

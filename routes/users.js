@@ -11,7 +11,7 @@
 //importing modules
 const express = require("express");
 const userController = require("../controllers/user");
-const { signup, getAllUsers, login, validateUser } = userController;
+const { signup, getAllUsers, login, getUserProfile, editUser } = userController;
 const userAuth = require("../middlewares/auth");
 const { authenticate, checkAdminRole, saveUser } = userAuth;
 
@@ -28,6 +28,18 @@ router.get(
     });
   }
 );
+
+//get user profile
+router.get(
+  "/profile",
+  authenticate,
+  (req, res) => {
+    getUserProfile(req, res).catch((error) => {
+      res.status(500).json({ error: "Internal Server Error" });
+    });
+  }
+);
+
 
 //signup endpoint DONE
 //passing the middleware function to the signup
@@ -56,5 +68,16 @@ router.post("/login",
     });
   },
 );
+
+router.put(
+  "/edit",
+  authenticate,
+  (req, res) => {
+    // Call the getAllUsers function here
+    editUser(req, res).catch((error) => {
+      res.status(500).json({ error: "Internal Server Error" });
+    });
+  },
+)
 
 module.exports = router;

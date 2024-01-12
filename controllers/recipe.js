@@ -19,7 +19,34 @@ const createDefaultRecipe = async () => {
 
 const getAllRecipes = async (req, res) => {
     try {
+
+        const { dataValues } = req.user;
+
+        const userId = dataValues.id;
+
         const recipes = await Recipe.findAll();
+
+        const favorites = await UserFavorites.findAll({ where: { userId: userId } });
+
+        const ratings = await Rating.findAll();
+
+        recipes.forEach(recipe => {
+            recipe.dataValues.isFavorite = false;
+            recipe.dataValues.rating = [];
+            
+            const favorite = favorites.find(favorite => favorite.recipeId === recipe.id);
+            if (favorite) {
+                recipe.dataValues.isFavorite = true;
+            } else {
+                recipe.dataValues.isFavorite = false;
+            }
+            const rating = ratings.filter(rating => rating.recipeId === recipe.id);
+            if (rating) {
+                recipe.dataValues.rating = rating;
+            } else {
+                recipe.dataValues.rating = [];
+            }
+        });
         return res.status(200).json(recipes);
     } catch (error) {
         return res.status(500).json({ error: error.message });
@@ -108,7 +135,7 @@ const getRecipeRecommendation = async (req, res) => {
 
         const preferences = user.preferences;
 
-        const { prompt } = req.body;
+        const { prompt, saisonMode } = req.body;
 
         // get list of recipes, each with a name and id
         const recipes = await Recipe.findAll({
@@ -117,25 +144,46 @@ const getRecipeRecommendation = async (req, res) => {
 
         const recipeListString = recipes.map(recipe => `${recipe.id}. ${recipe.name}`).join('\n');
 
+        let content = '';
+
+        if (saisonMode) {
+            content =  `
+                You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
+                Your expertise ranges from classic French cuisine to innovative modern dishes.
+                You're known for your creative flavor combinations and impeccable presentation skills.
+                You gonna get asked for a recipe recommendation from user. 
+                From all the recipes from your database and based on the user preferences, the suitable season and the current season,
+                you need to recommend the best recipe for the user.
+                Here is the list of recipes from your database:${recipeListString}.
+                Here are the user's preferences:${preferences}.
+                You have to return/answer with a JSON object only with this format, dont say anything else:
+                {
+                    "recipeId": 1,
+                    "similarRecipeIds": [2, 3, 4, 5],
+                    "shoppingList": "Shopping List for [Recipe Name]\\n\\nIngredients:\\n- Ingredient 1\\n- Ingredient 2\\n- Ingredient 3\\n- [Additional ingredients...]"
+                }
+            `;
+        } else {
+            content =  `
+                You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
+                Your expertise ranges from classic French cuisine to innovative modern dishes.
+                You're known for your creative flavor combinations and impeccable presentation skills.
+                You gonna get asked for a recipe recommendation from user. From all the recipes from your database and the user preferences,
+                you need to recommend the best recipe for the user.
+                Here is the list of recipes from your database:${recipeListString}.
+                Here are the user's preferences:${preferences}.
+                You have to return/answer with a JSON object only with this format, dont say anything else:
+                {
+                    "recipeId": 1,
+                    "similarRecipeIds": [2, 3, 4, 5],
+                    "shoppingList": "Shopping List for [Recipe Name]\\n\\nIngredients:\\n- Ingredient 1\\n- Ingredient 2\\n- Ingredient 3\\n- [Additional ingredients...]"
+                }
+            `;
+        }
         const messages = [
             {
                 role: "system",
-                content: 
-                    `
-                        You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
-                        Your expertise ranges from classic French cuisine to innovative modern dishes.
-                        You're known for your creative flavor combinations and impeccable presentation skills.
-                        You gonna get asked for a recipe recommendation from user. From all the recipes from your database and the user preferences,
-                        you need to recommend the best recipe for the user.
-                        Here is the list of recipes from your database:${recipeListString}.
-                        Here are the user's preferences:${preferences}.
-                        You have to return/answer with a JSON object only with this format:
-                        {
-                            "recipeId": 1,
-                            "similarRecipeIds": [2, 3, 4, 5],
-                            "shoppingList": "Shopping List for [Recipe Name]\\n\\nIngredients:\\n- Ingredient 1\\n- Ingredient 2\\n- Ingredient 3\\n- [Additional ingredients...]"
-                        }
-                    `
+                content: content
             },
             {
                 role: "user",
@@ -183,7 +231,7 @@ const getPairingRecommendation = async (req, res) => {
                         Your expertise ranges from classic French cuisine to innovative modern dishes.
                         You're known for your creative flavor combinations and impeccable presentation skills.
                         You gonna get asked for dishes's pairing recommendation from user.
-                        You have to return/answer with a JSON object only with this format:
+                        You have to return/answer with a JSON object only with this format, dont say anything else:
                         {
                             "recommendation": "Brief text describing the pairing recommendation",
                         }
@@ -212,6 +260,104 @@ const getPairingRecommendation = async (req, res) => {
     }
 }
 
+const getCalorie = async (req, res) => {
+    try {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const { recipeId } = req.body;
+
+        const recipe = await Recipe.findOne({ where: { id: recipeId } });
+
+        const prompt = `Hi Chef, I want to know the calorie amount of this dish: ${recipe.name}`;
+
+        const messages = [
+            {
+                role: "system",
+                content: `You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
+                        Your expertise ranges from classic French cuisine to innovative modern dishes.
+                        You're known for your creative flavor combinations and impeccable presentation skills.
+                        You gonna get asked for dishes's pairing recommendation from user.
+                        You have to return/answer with a JSON object only with this format, dont say anything else:
+                        {
+                            "calorie": "xxx calories",
+                        }
+                        `
+            },
+            {
+                role: "user",
+                content: prompt
+            }
+        ];
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: messages,
+        });
+
+        const response = JSON.parse(completion.choices[0].message.content);
+
+        const calorieInfos = {
+            calorie: response.calorie
+        }
+        return res.status(200).json(calorieInfos);
+    }
+    catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+
+const getRecipeShoppingList = async (req, res) => {
+    try {
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+
+        const recipe = await Recipe.findOne({ where: { id: req.params.id } });
+        if (!recipe) {
+            return res.status(404).json({ error: "Recipe not found" });
+        }
+
+        const prompt = `Hi Chef, I want to get the shopping list of this dish: ${recipe.name}`;
+
+        const messages = [
+            {
+                role: "system",
+                content: `You are a Michelin-starred chef with over 15 years of experience and numerous international culinary awards.
+                        Your expertise ranges from classic French cuisine to innovative modern dishes.
+                        You're known for your creative flavor combinations and impeccable presentation skills.
+                        You gonna get asked for dishes's pairing recommendation from user.
+                        You have to return/answer with a JSON object only with strictly this format, dont say anything else:
+                        {
+                            "shoppingList": "Shopping List for [Recipe Name]\\n\\nIngredients:\\n- Ingredient 1\\n- Ingredient 2\\n- Ingredient 3\\n- [Additional ingredients...]"
+                        }
+                        `
+            },
+            {
+                role: "user",
+                content: prompt
+            }
+        ];
+
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: messages,
+        });
+
+        const response = JSON.parse(completion.choices[0].message.content);
+
+        const shoppingList = {
+            shoppingListString: response.shoppingList
+        }
+        return res.status(200).json(shoppingList);
+    }
+    catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+
+
 const addRecipeToFavorites = async (req, res) => {
     try {
         const { dataValues } = req.user;
@@ -239,9 +385,12 @@ const rateRecipe = async (req, res) => {
 
         const userId = dataValues.id;
 
-        const { recipeId, rating, comment } = req.body;
+        const recipe = await Recipe.findOne({ where: { id: req.params.id } });
+        if (!recipe) {
+            return res.status(404).json({ error: "Recipe not found" });
+        }
 
-        const recipe = await Recipe.findOne({ where: { id: recipeId } });
+        const { rating, comment } = req.body;
 
         const ratingCreated = await Rating.create({
             userId: userId,
@@ -251,6 +400,21 @@ const rateRecipe = async (req, res) => {
         });
 
         return res.status(200).json(ratingCreated);
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+}
+
+const getRecipeRating = async (req, res) => {
+    try {
+        const recipe = await Recipe.findOne({ where: { id: req.params.id } });
+        if (!recipe) {
+            return res.status(404).json({ error: "Recipe not found" });
+        }
+
+        const ratings = await Rating.findAll({ where: { recipeId: recipe.id } });
+
+        return res.status(200).json(ratings);
     } catch (error) {
         return res.status(500).json({ error: error.message });
     }
@@ -266,5 +430,8 @@ module.exports = {
     getRecipeRecommendation,
     addRecipeToFavorites,
     getPairingRecommendation,
-    rateRecipe
+    rateRecipe,
+    getCalorie,
+    getRecipeRating,
+    getRecipeShoppingList
 };
